@@ -1,0 +1,34 @@
+<?php
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $secret = '6LdslkgqAAAAAA9Aidft27089HlU4-jyH56jOGdz';
+    $response = $_POST['g-recaptcha-response'];
+    $remoteip = $_SERVER['REMOTE_ADDR'];
+
+    // Verifica la respuesta del CAPTCHA
+    $url = 'https://www.google.com/recaptcha/api/siteverify';
+    $data = array(
+        'secret' => $secret,
+        'response' => $response,
+        'remoteip' => $remoteip
+    );
+
+    $options = array(
+        'http' => array(
+            'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+            'method'  => 'POST',
+            'content' => http_build_query($data),
+        ),
+    );
+    $context  = stream_context_create($options);
+    $verify = file_get_contents($url, false, $context);
+    $captcha_success = json_decode($verify);
+
+    if ($captcha_success->success) {
+        echo "CAPTCHA verificado con éxito.";
+        // Aquí puedes redirigir al usuario a otra página, por ejemplo:
+        header("Location: contenido_protegido.html");
+    } else {
+        echo "Verificación fallida, por favor intenta de nuevo.";
+    }
+}
+?>
